@@ -17,13 +17,14 @@ Overhang enables climbers to create accounts, log their climbing sessions across
 
 ## Tech Stack
 
-- **Backend:** FastAPI (Python 3.11+)
+- **Backend:** FastAPI (Python 3.11+) 
 - **Database:** SQLite with SQLAlchemy ORM
 - **Authentication:** JWT tokens
-- **Frontend:** Jinja2 templates with Tailwind CSS
-- **Charts:** Chart.js
-- **Testing:** pytest with coverage
-- **Package Manager:** uv
+- **Frontend:** React with TypeScript
+- **Build Tool:** Vite
+- **Charts:** Chart.js (will be integrated in frontend)
+- **Testing:** pytest with coverage (backend), Jest/React Testing Library (frontend)
+- **Package Manager:** uv (backend), npm (frontend)
 
 ## Quick Start
 
@@ -31,6 +32,7 @@ Overhang enables climbers to create accounts, log their climbing sessions across
 
 - Python 3.11 or higher
 - uv package manager (installed automatically by setup script)
+- Node.js 16 or higher (for frontend)
 - Git
 
 ### Installation
@@ -46,29 +48,54 @@ cd overhang
 ./scripts/setup-dev.sh
 ```
 
-3. Activate the virtual environment:
+3. Setup backend environment:
 ```bash
 cd packages/backend
 source .venv/bin/activate
 ```
 
-4. Update the `.env` file with your configuration (optional for development)
-
-5. Run the development server:
+4. Setup frontend environment:
 ```bash
-tox -e dev
+cd packages/frontend
+npm install
 ```
 
-The application will be available at http://localhost:8000
+5. Run the development servers:
+```bash
+# In one terminal, run backend
+cd packages/backend
+tox -e dev
+
+# In another terminal, run frontend
+cd packages/frontend
+npm run dev
+```
+
+The application will be available at:
+- Backend: http://localhost:8000
+- Frontend: http://localhost:3000
 
 ## Development Commands
 
 ```bash
+# Setup backend
+cd packages/backend
+./scripts/setup-dev.sh
+
+# Setup frontend
+cd packages/frontend
+npm install
+
+# Run backend development server
+cd packages/backend
+tox -e dev
+
+# Run frontend development server
+cd packages/frontend
+npm run dev
+
 # Run all tests
 tox
-
-# Run development server with hot reload
-tox -e dev
 
 # Run linting
 tox -e lint
@@ -79,24 +106,25 @@ tox -e format
 # Run type checking
 tox -e type
 
-# Seed database with gym locations
+# Seed database
 tox -e seed
-
-# Run tests with coverage
-pytest --cov=app --cov-report=html
 ```
 
 ## Project Structure
 
 ```
 overhang/
-├── packages/backend/        # Backend application
-│   ├── app/                # FastAPI application
-│   │   ├── routers/       # API route handlers
-│   │   ├── static/        # CSS and JavaScript
-│   │   └── templates/     # Jinja2 templates
-│   ├── scripts/           # Database seeding scripts
-│   └── tests/             # Test suite
+├── packages/
+│   ├── backend/            # Python FastAPI backend
+│   │   ├── app/            # FastAPI application
+│   │   │   ├── routers/    # API route handlers
+│   │   │   └── ...         # Other backend components
+│   │   ├── scripts/        # Database seeding scripts
+│   │   └── tests/          # Test suite
+│   └── frontend/           # TypeScript React frontend
+│       ├── src/            # Source code
+│       ├── public/         # Static assets
+│       └── package.json    # Frontend dependencies
 ├── deployment/            # Deployment configurations
 ├── docs/                  # Documentation
 └── scripts/              # Development scripts
