@@ -1,6 +1,7 @@
 from datetime import date as date_type
 from datetime import datetime
 
+from better_profanity import profanity
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 
@@ -21,6 +22,13 @@ class UserBase(BaseModel):
 class UserCreate(UserBase):
     password: str
     home_location_id: int
+
+    @field_validator("username")
+    @classmethod
+    def username_not_offensive(cls, v: str) -> str:
+        if profanity.contains_profanity(v):
+            raise ValueError("Username contains inappropriate language")
+        return v
 
 
 class User(UserBase):
