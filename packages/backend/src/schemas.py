@@ -68,12 +68,6 @@ class GradeEntry(BaseModel):
             raise ValueError(f"Grade must be one of: {', '.join(valid_grades)}")
         return v
 
-    @model_validator(mode="after")
-    def validate_completed_leq_attempts(self) -> "GradeEntry":
-        if self.attempts > 0 and self.completed > self.attempts:
-            raise ValueError("Completed count cannot exceed attempts")
-        return self
-
 
 class SessionBase(BaseModel):
     location_id: int
