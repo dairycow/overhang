@@ -100,7 +100,12 @@ function SessionForm({ onSessionCreated }: SessionFormProps) {
       await apiClient.post('/api/sessions', filteredSessionData)
       onSessionCreated()
     } catch (err: any) {
-      setError(err.response?.data?.detail || 'Failed to create session')
+      const detail = err.response?.data?.detail
+      if (Array.isArray(detail)) {
+        setError(detail.map(d => d.msg || d.message || 'Validation error').join(', '))
+      } else {
+        setError(detail || 'Failed to create session')
+      }
     } finally {
       setLoading(false)
     }
