@@ -51,7 +51,7 @@ function SessionForm({ onSessionCreated }: SessionFormProps) {
 
   const fetchLocations = async () => {
     try {
-      const response = await apiClient.get('/locations')
+      const response = await apiClient.get('/api/locations')
       setLocations(response.data)
       if (response.data.length > 0) {
         // Use user's home location if available and valid, otherwise use first location

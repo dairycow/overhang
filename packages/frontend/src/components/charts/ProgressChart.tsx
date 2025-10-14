@@ -53,7 +53,7 @@ function ProgressChart({ locationId, startDate, endDate }: ProgressChartProps) {
       if (startDate) params.append('start_date', startDate)
       if (endDate) params.append('end_date', endDate)
 
-      const response = await apiClient.get(`/stats/user/progress?${params.toString()}`)
+      const response = await apiClient.get(`/api/stats/user/progress?${params.toString()}`)
       setData(response.data)
     } catch (err: any) {
       setError(err.response?.data?.detail || 'Failed to load progress data')

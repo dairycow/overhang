@@ -21,7 +21,7 @@ function Dashboard() {
 
   const fetchLocations = async () => {
     try {
-      const response = await apiClient.get('/locations')
+      const response = await apiClient.get('/api/locations')
       setLocations(response.data)
     } catch (err) {
       console.error('Failed to fetch locations:', err)

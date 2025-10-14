@@ -37,7 +37,7 @@ function LocationDistributionChart({ locationId }: LocationDistributionChartProp
       setLoading(true)
       setError('')
 
-      const response = await apiClient.get(`/stats/location/${locationId}`)
+      const response = await apiClient.get(`/api/stats/location/${locationId}`)
       setData(response.data)
     } catch (err: any) {
       setError(err.response?.data?.detail || 'Failed to load location statistics')

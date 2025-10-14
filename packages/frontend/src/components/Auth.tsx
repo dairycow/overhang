@@ -29,7 +29,7 @@ function Auth({ onLogin }: AuthProps) {
 
   const fetchLocations = async () => {
     try {
-      const response = await apiClient.get('/locations')
+      const response = await apiClient.get('/api/locations')
       setLocations(response.data)
       if (response.data.length > 0) {
         setRegisterLocationId(response.data[0].id)

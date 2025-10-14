@@ -19,8 +19,8 @@ function Homepage() {
     try {
       setLoading(true)
       const [locationsRes, statsRes] = await Promise.all([
-        apiClient.get('/locations'),
-        apiClient.get('/stats/aggregate?period=all')
+        apiClient.get('/api/locations'),
+        apiClient.get('/api/stats/aggregate?period=all')
       ])
       setLocations(locationsRes.data)
       setStats(statsRes.data)

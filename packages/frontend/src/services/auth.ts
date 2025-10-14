@@ -21,7 +21,7 @@ export const authService = {
 
   // Get current user info
   async getCurrentUser(): Promise<any> {
-    const response = await apiClient.get('/auth/me')
+    const response = await apiClient.get('/api/auth/me')
     return response.data
   },
 

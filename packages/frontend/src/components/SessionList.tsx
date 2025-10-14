@@ -15,7 +15,7 @@ function SessionList() {
   const fetchSessions = async () => {
     try {
       setLoading(true)
-      const response = await apiClient.get('/sessions')
+      const response = await apiClient.get('/api/sessions')
       setSessions(response.data)
     } catch (err: any) {
       setError(err.response?.data?.detail || 'Failed to load sessions')
