@@ -1,18 +1,28 @@
 # Implementation Plan: Testing, Documentation & Deployment
 
+## Status: 🔴 NOT STARTED
+
 ## Overview
-Complete comprehensive testing, write documentation, and deploy the application to production.
+Complete comprehensive testing, write documentation, and deploy the React SPA + FastAPI application to production.
 
 ## Prerequisites
-- Plans 01-04 completed
+- Plans 01-04 completed ✅ (Plan 04 in progress - visualizations needed)
 - Application fully functional locally
 - All features implemented
+
+## Architecture Notes
+- **Frontend:** React SPA built with Vite, served as static files
+- **Backend:** FastAPI serving API + static frontend files
+- **Deployment:** Single server, Nginx reverse proxy to FastAPI
+- **Build process:** `npm run build` → `dist/` folder served by FastAPI
 
 ## Tasks
 
 ### 5.1 Comprehensive Testing
+
+#### Backend Testing
 - [ ] Achieve 80%+ test coverage:
-  - Run `pytest --cov=app --cov-report=html`
+  - Run `pytest --cov=src --cov-report=html`
   - Identify untested code paths
   - Add tests for uncovered areas
 - [ ] Integration tests:
@@ -29,20 +39,32 @@ Complete comprehensive testing, write documentation, and deploy the application 
 - [ ] Performance tests:
   - Statistics endpoints with large datasets (simulate 1000+ sessions)
   - Concurrent user sessions
-- [ ] Manual testing checklist:
+
+#### Frontend Testing
+- [ ] Add frontend test framework (optional for MVP):
+  - Consider Vitest for unit tests
+  - Consider React Testing Library for component tests
+- [ ] Manual testing checklist (critical for SPA):
+  - [ ] Homepage loads without authentication
   - [ ] Register new user
   - [ ] Login with correct credentials
   - [ ] Login with wrong credentials fails
-  - [ ] Log climbing session
-  - [ ] View dashboard charts
-  - [ ] Filter by location
-  - [ ] Filter by date range
-  - [ ] Edit session
-  - [ ] Delete session
-  - [ ] View location page
-  - [ ] View homepage stats
-  - [ ] Logout
-  - [ ] Test on mobile device
+  - [ ] Dashboard loads with charts
+  - [ ] Log climbing session (multi-grade)
+  - [ ] View session list
+  - [ ] Charts display data correctly
+  - [ ] Progress chart shows climbs over time
+  - [ ] Distribution pie chart shows grade breakdown
+  - [ ] Filter by location updates charts
+  - [ ] Filter by date range updates charts
+  - [ ] Edit session (if implemented)
+  - [ ] Delete session (if implemented)
+  - [ ] View location page with stats
+  - [ ] View homepage network stats chart
+  - [ ] Logout clears token and redirects
+  - [ ] Test on mobile device (responsive charts)
+  - [ ] Test on tablet (iPad)
+  - [ ] Browser testing (Chrome, Firefox, Safari)
 
 ### 5.2 Documentation
 
@@ -118,7 +140,39 @@ Complete comprehensive testing, write documentation, and deploy the application 
   - Contributing guidelines (if applicable)
   - License information
 
-### 5.3 Deployment Preparation
+### 5.3 Frontend Build Integration
+
+#### Serve React Build from FastAPI
+- [ ] Update `src/main.py` to serve static files:
+  ```python
+  from fastapi.staticfiles import StaticFiles
+
+  # Serve React build files
+  app.mount("/assets", StaticFiles(directory="../frontend/dist/assets"), name="assets")
+
+  # Catch-all route for React SPA (must be last)
+  @app.get("/{full_path:path}")
+  async def serve_spa(full_path: str):
+      return FileResponse("../frontend/dist/index.html")
+  ```
+- [ ] Create build script:
+  ```bash
+  # scripts/build-frontend.sh
+  cd packages/frontend
+  npm run build
+  cd ../..
+  ```
+- [ ] Update `.gitignore` to exclude `packages/frontend/dist/`
+- [ ] Test locally that API routes work and frontend serves correctly
+
+#### Production Build Process
+- [ ] Document build steps in deployment guide:
+  1. Pull latest code
+  2. Build frontend: `cd packages/frontend && npm run build`
+  3. Restart FastAPI service
+  4. Frontend served from `/`, API at `/api/*` or same origin
+
+### 5.4 Deployment Preparation
 
 #### Environment Configuration
 - [ ] Create production `.env` file:
