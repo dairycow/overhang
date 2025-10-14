@@ -23,7 +23,7 @@ jobs:
           key: ${{ secrets.DEPLOY_SSH_KEY }}
           script: |
             set -e
-            cd ~/apps/overhang
+            cd /root/overhang
 
             echo "Pulling latest changes..."
             git pull origin main

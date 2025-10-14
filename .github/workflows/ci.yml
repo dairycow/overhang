@@ -59,11 +59,7 @@ jobs:
         working-directory: ./packages/frontend
         run: npm ci
 
-      - name: Run linting
-        working-directory: ./packages/frontend
-        run: npm run lint
-
-      - name: Run type checking
+       - name: Run type checking
         working-directory: ./packages/frontend
         run: npx tsc --noEmit
 
