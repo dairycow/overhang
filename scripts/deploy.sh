@@ -77,7 +77,8 @@ echo "NOTE: Make sure your domain $DOMAIN points to this server's IP address!"
 read -p "Press enter when your DNS is configured and ready..."
 
 # Run certbot to get SSL certificate
-docker-compose run --rm certbot certonly \
+# Use --entrypoint to override the auto-renewal loop in docker-compose.yml
+docker-compose run --rm --entrypoint certbot certbot certonly \
     --webroot \
     --webroot-path=/var/www/certbot \
     --email $EMAIL \
