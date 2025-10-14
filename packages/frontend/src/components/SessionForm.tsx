@@ -97,7 +97,7 @@ function SessionForm({ onSessionCreated }: SessionFormProps) {
         return
       }
 
-      await apiClient.post('/sessions', filteredSessionData)
+      await apiClient.post('/api/sessions', filteredSessionData)
       onSessionCreated()
     } catch (err: any) {
       setError(err.response?.data?.detail || 'Failed to create session')
