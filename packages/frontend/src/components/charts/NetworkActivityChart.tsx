@@ -41,7 +41,7 @@ function NetworkActivityChart({ period = 'week' }: NetworkActivityChartProps) {
       setLoading(true)
       setError('')
 
-      const response = await apiClient.get(`/stats/aggregate?period=${period}`)
+      const response = await apiClient.get(`/api/stats/aggregate?period=${period}`)
       setData(response.data)
     } catch (err: any) {
       setError(err.response?.data?.detail || 'Failed to load network activity data')

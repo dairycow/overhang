@@ -23,11 +23,11 @@ function LocationDetail() {
       setError('')
 
       // Fetch location details
-      const locationRes = await apiClient.get(`/locations/${slug}`)
+      const locationRes = await apiClient.get(`/api/locations/${slug}`)
       setLocation(locationRes.data)
 
       // Fetch location stats
-      const statsRes = await apiClient.get(`/stats/location/${locationRes.data.id}`)
+      const statsRes = await apiClient.get(`/api/stats/location/${locationRes.data.id}`)
       setStats(statsRes.data)
     } catch (err: any) {
       setError(err.response?.data?.detail || 'Failed to load location data')

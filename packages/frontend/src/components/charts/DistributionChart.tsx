@@ -42,7 +42,7 @@ function DistributionChart({ locationId, period = 'all' }: DistributionChartProp
       if (locationId) params.append('location_id', locationId.toString())
       params.append('period', period)
 
-      const response = await apiClient.get(`/stats/user/distribution?${params.toString()}`)
+      const response = await apiClient.get(`/api/stats/user/distribution?${params.toString()}`)
       setData(response.data)
     } catch (err: any) {
       setError(err.response?.data?.detail || 'Failed to load distribution data')

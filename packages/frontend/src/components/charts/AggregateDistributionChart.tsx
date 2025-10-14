@@ -41,7 +41,7 @@ function AggregateDistributionChart({ locationId, period = 'all' }: AggregateDis
       params.append('period', period)
       if (locationId) params.append('location_id', locationId.toString())
 
-      const response = await apiClient.get(`/stats/aggregate?${params.toString()}`)
+      const response = await apiClient.get(`/api/stats/aggregate?${params.toString()}`)
       setData(response.data)
     } catch (err: any) {
       setError(err.response?.data?.detail || 'Failed to load distribution data')
