@@ -1,0 +1,51 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:  # Allow manual triggers
+
+jobs:
+  test:
+    uses: ./.github/workflows/ci.yml
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: test
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Deploy to Digital Ocean
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          script: |
+            set -e
+            cd ~/apps/overhang
+
+            echo "Pulling latest changes..."
+            git pull origin main
+
+            echo "Building Docker images..."
+            docker-compose build
+
+            echo "Restarting services..."
+            docker-compose up -d
+
+            echo "Pruning old images..."
+            docker image prune -f
+
+            echo "Deployment complete!"
+            docker-compose ps
+
+      - name: Health Check
+        run: |
+          sleep 10
+          curl -f https://overhang.au/health || exit 1
+
+      - name: Notify on Failure
+        if: failure()
+        run: |
+          echo "Deployment failed! Check logs at: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"

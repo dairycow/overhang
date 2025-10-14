@@ -43,6 +43,7 @@ overhang.db
 # Environment variables
 .env
 .env.local
+.env.production
 
 # Testing
 .coverage
@@ -148,6 +149,12 @@ public
 # Temporary folders
 tmp/
 temp/
+
+# Docker
+data/
+
+# SSL certificates
+nginx/ssl/
 
 # Editor directories and files
 .vscode/*
