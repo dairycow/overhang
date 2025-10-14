@@ -7,7 +7,7 @@ export const authService = {
     const formData = new URLSearchParams()
     formData.append('username', credentials.username)
     formData.append('password', credentials.password)
-    const response = await apiClient.post<AuthResponse>('/auth/login', formData, {
+    const response = await apiClient.post<AuthResponse>('/api/auth/login', formData, {
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
     })
     return response.data
@@ -15,7 +15,7 @@ export const authService = {
 
   // Register new user
   async register(credentials: RegisterCredentials): Promise<AuthResponse> {
-    const response = await apiClient.post<AuthResponse>('/auth/register', credentials)
+    const response = await apiClient.post<AuthResponse>('/api/auth/register', credentials)
     return response.data
   },
 
