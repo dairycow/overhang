@@ -55,6 +55,8 @@ services:
     volumes:
       - ./nginx/ssl:/etc/letsencrypt
       - certbot-data:/var/www/certbot
+    # Note: entrypoint only used for the running service (auto-renewal)
+    # For manual cert acquisition, use: docker-compose run --rm --entrypoint certbot certbot certonly ...
     entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
 
 volumes:

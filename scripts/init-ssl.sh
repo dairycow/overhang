@@ -57,7 +57,8 @@ sleep 3
 
 # Obtain certificate
 echo -e "${BLUE}Obtaining SSL certificate from Let's Encrypt...${NC}"
-docker-compose run --rm certbot certonly \
+# Use --entrypoint to override the auto-renewal loop in docker-compose.yml
+docker-compose run --rm --entrypoint certbot certbot certonly \
     --webroot \
     --webroot-path=/var/www/certbot \
     --email $EMAIL \
