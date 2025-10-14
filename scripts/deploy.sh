@@ -11,7 +11,19 @@ NC='\033[0m' # No Color
 
 # Configuration
 DOMAIN="overhang.au"
-EMAIL="admin@overhang.au"  # Change this to your email
+EMAIL="${LETSENCRYPT_EMAIL:-admin@overhang.au}"  # Override with env var LETSENCRYPT_EMAIL
+
+# Prompt for email if using default
+if [ "$EMAIL" = "admin@overhang.au" ]; then
+    echo -e "${BLUE}Let's Encrypt Email Configuration${NC}"
+    echo "Please enter your email for SSL certificate notifications:"
+    read -p "Email: " USER_EMAIL
+    if [ -n "$USER_EMAIL" ]; then
+        EMAIL="$USER_EMAIL"
+    else
+        echo -e "${RED}Warning: Using default email. Set LETSENCRYPT_EMAIL env var to avoid this prompt.${NC}"
+    fi
+fi
 
 echo -e "${BLUE}Step 1: Checking prerequisites...${NC}"
 
@@ -79,6 +91,9 @@ if [ $? -eq 0 ]; then
 
     echo -e "${BLUE}Step 7: Starting all services with SSL...${NC}"
     docker-compose up -d
+
+    echo -e "${BLUE}Step 8: Seeding database with locations...${NC}"
+    docker-compose exec -T backend python scripts/seed_locations.py
 
     echo -e "${GREEN}Deployment complete!${NC}"
     echo -e "${GREEN}Your application should now be running at https://$DOMAIN${NC}"

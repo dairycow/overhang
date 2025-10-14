@@ -49,7 +49,11 @@ Wait for propagation (check with `dig overhang.au`).
 bash scripts/deploy.sh
 ```
 
-Press enter when prompted (after DNS is ready).
+When prompted:
+- Enter your email for SSL notifications
+- Press enter when DNS is ready
+
+The script will automatically seed gym locations.
 
 ### 6. Verify
 Visit https://overhang.au

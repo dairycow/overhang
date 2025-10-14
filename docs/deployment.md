@@ -122,8 +122,12 @@ The script will:
 4. Start services
 5. Obtain SSL certificate from Let's Encrypt
 6. Start all services with HTTPS
+7. Seed database with gym locations
 
-**Note:** When prompted, confirm your DNS is configured and pointing to the server.
+**Notes:**
+- When prompted for email, enter your real email (for SSL certificate notifications)
+- When prompted for DNS, confirm your domain is pointing to the server
+- The script automatically seeds Australian Blochaus gym locations
 
 ## Step 7: Verify Deployment
 
@@ -189,6 +193,20 @@ git pull
 # Rebuild and restart
 docker-compose build
 docker-compose up -d
+```
+
+### Seed/Reseed Locations
+
+If you need to add locations after initial deployment:
+
+```bash
+bash scripts/seed-production.sh
+```
+
+Or manually:
+
+```bash
+docker-compose exec backend python scripts/seed_locations.py
 ```
 
 ### Database Backup
