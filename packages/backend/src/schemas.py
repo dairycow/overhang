@@ -1,8 +1,34 @@
 from datetime import date as date_type
 from datetime import datetime
-from typing import List, Optional
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+
+
+class TokenData(BaseModel):
+    username: str
+
+
+class UserBase(BaseModel):
+    username: str
+    email: str | None = None
+
+
+class UserCreate(UserBase):
+    password: str
+    home_location_id: int
+
+
+class User(UserBase):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    home_location_id: int
+    created_at: datetime
 
 
 class LocationBase(BaseModel):
@@ -16,18 +42,16 @@ class LocationCreate(LocationBase):
 
 class Location(LocationBase):
     model_config = ConfigDict(from_attributes=True)
-    
+
     id: int
     created_at: datetime
 
 
-class ClimbBase(BaseModel):
+class GradeEntry(BaseModel):
     grade: str
-    attempts: int = Field(..., gt=0)
-    completed: bool
-    rating: Optional[int] = Field(None, ge=1, le=10)
-    notes: Optional[str] = None
-    
+    attempts: int = Field(0, ge=0)
+    completed: int = Field(..., ge=0)
+
     @field_validator("grade")
     @classmethod
     def grade_valid(cls, v: str) -> str:
@@ -36,39 +60,37 @@ class ClimbBase(BaseModel):
             raise ValueError(f"Grade must be one of: {', '.join(valid_grades)}")
         return v
 
-
-class ClimbCreate(ClimbBase):
-    pass
-
-
-class Climb(ClimbBase):
-    model_config = ConfigDict(from_attributes=True)
-    
-    id: int
-    session_id: int
-    created_at: datetime
+    @model_validator(mode="after")
+    def validate_completed_leq_attempts(self) -> "GradeEntry":
+        if self.attempts > 0 and self.completed > self.attempts:
+            raise ValueError("Completed count cannot exceed attempts")
+        return self
 
 
 class SessionBase(BaseModel):
     location_id: int
     date: date_type = Field(default_factory=date_type.today)
-    notes: Optional[str] = None
+    grades: list[GradeEntry] = Field(..., min_length=1)
+    rating: int | None = Field(None, ge=1, le=10)
+    notes: str | None = None
 
 
 class SessionCreate(SessionBase):
-    climbs: List[ClimbCreate]
+    pass
 
 
 class SessionUpdate(BaseModel):
-    location_id: Optional[int] = None
-    date: Optional[date_type] = None
-    notes: Optional[str] = None
+    location_id: int | None = None
+    date: date_type | None = None
+    grades: list[GradeEntry] | None = None
+    rating: int | None = Field(None, ge=1, le=10)
+    notes: str | None = None
 
 
 class Session(SessionBase):
     model_config = ConfigDict(from_attributes=True)
-    
+
     id: int
     user_id: int
+    location_name: str
     created_at: datetime
-    climbs: List[Climb] = []

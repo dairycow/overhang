@@ -4,9 +4,9 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
-from app.database import Base, get_db
-from app.main import app
-from app.models import Location
+from ..src.database import Base, get_db
+from ..src.main import app
+from ..src.models import Location
 
 engine = create_engine(
     "sqlite:///:memory:",
@@ -33,14 +33,14 @@ client = TestClient(app)
 def setup_database():
     Base.metadata.create_all(bind=engine)
     db = TestingSessionLocal()
-    
+
     location = Location(name="Test Gym", slug="test-gym")
     db.add(location)
     db.commit()
     db.close()
-    
+
     yield
-    
+
     Base.metadata.drop_all(bind=engine)
 
 
@@ -76,7 +76,7 @@ def test_get_location_not_found():
 
 def test_user_progress(auth_token):
     from datetime import date
-    
+
     client.post(
         "/sessions",
         json={
@@ -88,7 +88,7 @@ def test_user_progress(auth_token):
         },
         headers={"Authorization": f"Bearer {auth_token}"},
     )
-    
+
     response = client.get(
         "/stats/user/progress", headers={"Authorization": f"Bearer {auth_token}"}
     )
@@ -100,7 +100,7 @@ def test_user_progress(auth_token):
 
 def test_user_distribution(auth_token):
     from datetime import date
-    
+
     client.post(
         "/sessions",
         json={
@@ -112,7 +112,7 @@ def test_user_distribution(auth_token):
         },
         headers={"Authorization": f"Bearer {auth_token}"},
     )
-    
+
     response = client.get(
         "/stats/user/distribution", headers={"Authorization": f"Bearer {auth_token}"}
     )
@@ -124,7 +124,7 @@ def test_user_distribution(auth_token):
 
 def test_location_stats(auth_token):
     from datetime import date
-    
+
     client.post(
         "/sessions",
         json={
@@ -136,7 +136,7 @@ def test_location_stats(auth_token):
         },
         headers={"Authorization": f"Bearer {auth_token}"},
     )
-    
+
     response = client.get("/stats/location/1")
     assert response.status_code == 200
     data = response.json()
@@ -146,7 +146,7 @@ def test_location_stats(auth_token):
 
 def test_aggregate_stats(auth_token):
     from datetime import date
-    
+
     client.post(
         "/sessions",
         json={
@@ -158,7 +158,7 @@ def test_aggregate_stats(auth_token):
         },
         headers={"Authorization": f"Bearer {auth_token}"},
     )
-    
+
     response = client.get("/stats/aggregate")
     assert response.status_code == 200
     data = response.json()

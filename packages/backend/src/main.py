@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from .config import settings
 from .database import init_db
-from .routers import auth, locations, pages, sessions, stats
+from .routers import auth, locations, sessions, stats
 
 app = FastAPI(
     title="Overhang API",
@@ -19,7 +19,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(pages.router, tags=["pages"])
 app.include_router(auth.router, prefix="/auth", tags=["auth"])
 app.include_router(locations.router, prefix="/locations", tags=["locations"])
 app.include_router(sessions.router, prefix="/sessions", tags=["sessions"])
