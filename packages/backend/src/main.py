@@ -9,6 +9,7 @@ app = FastAPI(
     title="Overhang API",
     description="Climbing progress tracking API",
     version="1.0.0",
+    redirect_slashes=False,
 )
 
 app.add_middleware(
