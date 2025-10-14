@@ -9,12 +9,12 @@
 
 ## 1. Executive Summary
 
-Overhang is a climbing progress tracking application for climbers at a chain of climbing gyms in Australia. The MVP enables climbers to create accounts, log their climbing sessions across multiple gym locations, and visualize their progress over time.
+Overhang is a climbing progress tracking application for climbers at a chain of climbing gyms in Australia. The MVP enables climbers to create accounts, log their climbing sessions across multiple gym locations, and visualise their progress over time.
 
 ### Goals
 - Simple user registration and authentication (username + password only)
 - Track climbing attempts and completions by grade across all gym locations
-- Visualize personal progress and gym-wide statistics
+- visualise personal progress and gym-wide statistics
 - Deploy on a cheap VM ($5-10/month) with minimal operational overhead
 
 ---
