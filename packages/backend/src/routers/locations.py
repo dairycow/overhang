@@ -8,7 +8,7 @@ from ..schemas import Location
 router = APIRouter()
 
 
-@router.get("/", response_model=list[Location])
+@router.get("", response_model=list[Location])
 def get_locations(db: Session = Depends(get_db)):
     return crud.get_locations(db)
 

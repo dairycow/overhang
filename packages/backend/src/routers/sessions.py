@@ -13,7 +13,7 @@ from ..schemas import SessionCreate, SessionUpdate
 router = APIRouter()
 
 
-@router.post("/", response_model=SessionSchema, status_code=status.HTTP_201_CREATED)
+@router.post("", response_model=SessionSchema, status_code=status.HTTP_201_CREATED)
 def create_session(
     session_data: SessionCreate,
     db: Session = Depends(get_db),
@@ -28,7 +28,7 @@ def create_session(
     return crud.create_session(db, session_data, current_user.id)
 
 
-@router.get("/", response_model=list[SessionSchema])
+@router.get("", response_model=list[SessionSchema])
 def get_sessions(
     location_id: int | None = None,
     start_date: date | None = None,
