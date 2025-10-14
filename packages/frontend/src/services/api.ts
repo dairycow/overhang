@@ -2,7 +2,7 @@ import axios from 'axios'
 
 // Create axios instance with base URL
 const apiClient = axios.create({
-  baseURL: '',
+  baseURL: typeof window !== 'undefined' ? window.location.origin : '',
   timeout: 10000,
 })
 
