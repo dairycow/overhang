@@ -1,29 +1,28 @@
 from datetime import datetime, timedelta
-from typing import Optional
 
 import bcrypt
 from jose import JWTError, jwt
 from sqlalchemy.orm import Session
 
-from app.config import settings
-from app.models import User
-from app.schemas import TokenData
+from .config import settings
+from .models import User
+from .schemas import TokenData
 
 
 def get_password_hash(password: str) -> str:
-    password_bytes = password.encode('utf-8')
+    password_bytes = password.encode("utf-8")
     salt = bcrypt.gensalt()
     hashed = bcrypt.hashpw(password_bytes, salt)
-    return hashed.decode('utf-8')
+    return hashed.decode("utf-8")
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-    password_bytes = plain_password.encode('utf-8')
-    hashed_bytes = hashed_password.encode('utf-8')
+    password_bytes = plain_password.encode("utf-8")
+    hashed_bytes = hashed_password.encode("utf-8")
     return bcrypt.checkpw(password_bytes, hashed_bytes)
 
 
-def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
+def create_access_token(data: dict, expires_delta: timedelta | None = None) -> str:
     to_encode = data.copy()
     if expires_delta:
         expire = datetime.utcnow() + expires_delta
@@ -38,12 +37,12 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -
     return encoded_jwt
 
 
-def decode_access_token(token: str) -> Optional[TokenData]:
+def decode_access_token(token: str) -> TokenData | None:
     try:
         payload = jwt.decode(
             token, settings.get_secret_key(), algorithms=[settings.algorithm]
         )
-        username: Optional[str] = payload.get("sub")
+        username: str | None = payload.get("sub")
         if username is None:
             return None
         return TokenData(username=username)
@@ -51,7 +50,7 @@ def decode_access_token(token: str) -> Optional[TokenData]:
         return None
 
 
-def authenticate_user(db: Session, username: str, password: str) -> Optional[User]:
+def authenticate_user(db: Session, username: str, password: str) -> User | None:
     user = db.query(User).filter(User.username == username).first()
     if not user:
         return None

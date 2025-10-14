@@ -4,7 +4,12 @@ import { AuthResponse, LoginCredentials, RegisterCredentials } from '../types'
 export const authService = {
   // Login user
   async login(credentials: LoginCredentials): Promise<AuthResponse> {
-    const response = await apiClient.post<AuthResponse>('/auth/login', credentials)
+    const formData = new URLSearchParams()
+    formData.append('username', credentials.username)
+    formData.append('password', credentials.password)
+    const response = await apiClient.post<AuthResponse>('/auth/login', formData, {
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+    })
     return response.data
   },
 

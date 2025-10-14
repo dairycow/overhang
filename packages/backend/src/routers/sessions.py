@@ -1,15 +1,14 @@
 from datetime import date
-from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from app import crud
-from app.database import get_db
-from app.dependencies import get_current_user
-from app.models import User
-from app.schemas import Session as SessionSchema
-from app.schemas import SessionCreate, SessionUpdate
+from .. import crud
+from ..database import get_db
+from ..dependencies import get_current_user
+from ..models import User
+from ..schemas import Session as SessionSchema
+from ..schemas import SessionCreate, SessionUpdate
 
 router = APIRouter()
 
@@ -25,15 +24,15 @@ def create_session(
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid location"
         )
-    
+
     return crud.create_session(db, session_data, current_user.id)
 
 
 @router.get("/", response_model=list[SessionSchema])
 def get_sessions(
-    location_id: Optional[int] = None,
-    start_date: Optional[date] = None,
-    end_date: Optional[date] = None,
+    location_id: int | None = None,
+    start_date: date | None = None,
+    end_date: date | None = None,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):

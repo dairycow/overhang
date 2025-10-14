@@ -3,10 +3,8 @@ from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 
-from app import crud
-from app.database import get_db
-from app.dependencies import get_current_user
-from app.models import User
+from .. import crud
+from ..database import get_db
 
 router = APIRouter()
 templates = Jinja2Templates(directory="app/templates")
@@ -49,7 +47,7 @@ async def location_page(request: Request, slug: str, db: Session = Depends(get_d
         return templates.TemplateResponse(
             "404.html", {"request": request}, status_code=404
         )
-    
+
     stats = crud.get_location_stats(db, location.id)
     return templates.TemplateResponse(
         "location.html",

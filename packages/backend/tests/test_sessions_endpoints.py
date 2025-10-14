@@ -1,14 +1,13 @@
 from datetime import date, timedelta
 
 import pytest
+from app.database import Base, get_db
+from app.main import app
+from app.models import Location
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
-
-from app.database import Base, get_db
-from app.main import app
-from app.models import Location
 
 engine = create_engine(
     "sqlite:///:memory:",
@@ -35,14 +34,14 @@ client = TestClient(app)
 def setup_database():
     Base.metadata.create_all(bind=engine)
     db = TestingSessionLocal()
-    
+
     location = Location(name="Test Gym", slug="test-gym")
     db.add(location)
     db.commit()
     db.close()
-    
+
     yield
-    
+
     Base.metadata.drop_all(bind=engine)
 
 
@@ -60,10 +59,10 @@ def test_create_session_success(auth_token):
         "/sessions",
         json={
             "location_id": 1,
-            "grade": "V3",
             "date": str(date.today()),
-            "attempts": 3,
-            "completed": True,
+            "grades": [
+                {"grade": "V3", "attempts": 3, "completed": 2}
+            ],
             "rating": 8,
             "notes": "Great climb!",
         },
@@ -71,9 +70,10 @@ def test_create_session_success(auth_token):
     )
     assert response.status_code == 201
     data = response.json()
-    assert data["grade"] == "V3"
-    assert data["attempts"] == 3
-    assert data["completed"] is True
+    assert len(data["grades"]) == 1
+    assert data["grades"][0]["grade"] == "V3"
+    assert data["grades"][0]["attempts"] == 3
+    assert data["grades"][0]["completed"] == 2
     assert data["rating"] == 8
 
 
@@ -82,10 +82,10 @@ def test_create_session_invalid_location(auth_token):
         "/sessions",
         json={
             "location_id": 999,
-            "grade": "V3",
             "date": str(date.today()),
-            "attempts": 3,
-            "completed": True,
+            "grades": [
+                {"grade": "V3", "attempts": 3, "completed": 2}
+            ],
         },
         headers={"Authorization": f"Bearer {auth_token}"},
     )
@@ -97,13 +97,34 @@ def test_create_session_unauthenticated():
         "/sessions",
         json={
             "location_id": 1,
-            "grade": "V3",
             "date": str(date.today()),
-            "attempts": 3,
-            "completed": True,
+            "grades": [
+                {"grade": "V3", "attempts": 3, "completed": 2}
+            ],
         },
     )
     assert response.status_code == 401
+
+
+def test_create_session_with_zero_attempts(auth_token):
+    response = client.post(
+        "/sessions",
+        json={
+            "location_id": 1,
+            "date": str(date.today()),
+            "grades": [
+                {"grade": "V3", "attempts": 0, "completed": 1}
+            ],
+            "rating": 7,
+        },
+        headers={"Authorization": f"Bearer {auth_token}"},
+    )
+    assert response.status_code == 201
+    data = response.json()
+    assert len(data["grades"]) == 1
+    assert data["grades"][0]["grade"] == "V3"
+    assert data["grades"][0]["attempts"] == 0
+    assert data["grades"][0]["completed"] == 1
 
 
 def test_get_sessions(auth_token):
@@ -118,7 +139,7 @@ def test_get_sessions(auth_token):
         },
         headers={"Authorization": f"Bearer {auth_token}"},
     )
-    
+
     response = client.get(
         "/sessions", headers={"Authorization": f"Bearer {auth_token}"}
     )
@@ -130,7 +151,7 @@ def test_get_sessions(auth_token):
 
 def test_get_sessions_with_filters(auth_token):
     yesterday = date.today() - timedelta(days=1)
-    
+
     client.post(
         "/sessions",
         json={
@@ -142,7 +163,7 @@ def test_get_sessions_with_filters(auth_token):
         },
         headers={"Authorization": f"Bearer {auth_token}"},
     )
-    
+
     response = client.get(
         f"/sessions?start_date={yesterday}&end_date={date.today()}",
         headers={"Authorization": f"Bearer {auth_token}"},
@@ -164,7 +185,7 @@ def test_get_session_by_id(auth_token):
         headers={"Authorization": f"Bearer {auth_token}"},
     )
     session_id = create_response.json()["id"]
-    
+
     response = client.get(
         f"/sessions/{session_id}", headers={"Authorization": f"Bearer {auth_token}"}
     )
@@ -192,7 +213,7 @@ def test_update_session(auth_token):
         headers={"Authorization": f"Bearer {auth_token}"},
     )
     session_id = create_response.json()["id"]
-    
+
     response = client.put(
         f"/sessions/{session_id}",
         json={"completed": True, "rating": 9},
@@ -226,12 +247,12 @@ def test_delete_session(auth_token):
         headers={"Authorization": f"Bearer {auth_token}"},
     )
     session_id = create_response.json()["id"]
-    
+
     response = client.delete(
         f"/sessions/{session_id}", headers={"Authorization": f"Bearer {auth_token}"}
     )
     assert response.status_code == 204
-    
+
     get_response = client.get(
         f"/sessions/{session_id}", headers={"Authorization": f"Bearer {auth_token}"}
     )
