@@ -1,12 +1,13 @@
 from datetime import date, datetime
 
 import pytest
-from src.database import Base
-from src.models import Location, Session, User
 from sqlalchemy import create_engine
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
+
+from src.database import Base
+from src.models import Location, Session, User
 
 
 @pytest.fixture(scope="function")
