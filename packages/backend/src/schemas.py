@@ -2,7 +2,7 @@ from datetime import date as date_type
 from datetime import datetime
 
 from better_profanity import profanity
-from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 class Token(BaseModel):

@@ -100,7 +100,11 @@ def test_register_short_username():
 def test_register_offensive_username():
     response = client.post(
         "/auth/register",
-        json={"username": "badword123", "password": "password123", "home_location_id": 1},
+        json={
+            "username": "badword123",
+            "password": "password123",
+            "home_location_id": 1,
+        },
     )
     assert response.status_code == 422
     assert "inappropriate language" in str(response.json())

@@ -4,6 +4,7 @@ import pytest
 from app.database import Base
 from app.models import Location, Session, User
 from sqlalchemy import create_engine
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
@@ -44,7 +45,7 @@ def test_location_unique_name(db_session):
     location2 = Location(name="Test Gym", slug="test-gym-2")
     db_session.add(location2)
 
-    with pytest.raises(Exception):
+    with pytest.raises(IntegrityError):
         db_session.commit()
 
 
