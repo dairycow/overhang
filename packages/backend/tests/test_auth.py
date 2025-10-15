@@ -1,6 +1,10 @@
 from datetime import timedelta
 
 import pytest
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy.pool import StaticPool
+
 from src.auth import (
     authenticate_user,
     create_access_token,
@@ -10,9 +14,6 @@ from src.auth import (
 )
 from src.database import Base
 from src.models import Location, User
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy.pool import StaticPool
 
 
 @pytest.fixture(scope="function")
