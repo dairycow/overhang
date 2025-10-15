@@ -1,15 +1,15 @@
 from datetime import timedelta
 
 import pytest
-from app.auth import (
+from src.auth import (
     authenticate_user,
     create_access_token,
     decode_access_token,
     get_password_hash,
     verify_password,
 )
-from app.database import Base
-from app.models import Location, User
+from src.database import Base
+from src.models import Location, User
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
