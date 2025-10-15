@@ -54,7 +54,7 @@ def auth_token():
 
 
 def test_get_locations():
-    response = client.get("/locations/")
+    response = client.get("/locations")
     assert response.status_code == 200
     data = response.json()
     assert len(data) >= 1
@@ -81,10 +81,8 @@ def test_user_progress(auth_token):
         "/sessions",
         json={
             "location_id": 1,
-            "grade": "V3",
             "date": str(date.today()),
-            "attempts": 3,
-            "completed": True,
+            "grades": [{"grade": "V3", "attempts": 3, "completed": 2}],
         },
         headers={"Authorization": f"Bearer {auth_token}"},
     )
@@ -105,10 +103,8 @@ def test_user_distribution(auth_token):
         "/sessions",
         json={
             "location_id": 1,
-            "grade": "V3",
             "date": str(date.today()),
-            "attempts": 3,
-            "completed": True,
+            "grades": [{"grade": "V3", "attempts": 3, "completed": 2}],
         },
         headers={"Authorization": f"Bearer {auth_token}"},
     )
@@ -129,10 +125,8 @@ def test_location_stats(auth_token):
         "/sessions",
         json={
             "location_id": 1,
-            "grade": "V3",
             "date": str(date.today()),
-            "attempts": 3,
-            "completed": True,
+            "grades": [{"grade": "V3", "attempts": 3, "completed": 2}],
         },
         headers={"Authorization": f"Bearer {auth_token}"},
     )
@@ -151,10 +145,8 @@ def test_aggregate_stats(auth_token):
         "/sessions",
         json={
             "location_id": 1,
-            "grade": "V3",
             "date": str(date.today()),
-            "attempts": 3,
-            "completed": True,
+            "grades": [{"grade": "V3", "attempts": 3, "completed": 2}],
         },
         headers={"Authorization": f"Bearer {auth_token}"},
     )
