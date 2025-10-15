@@ -1,8 +1,8 @@
 from datetime import date, datetime
 
 import pytest
-from app.database import Base
-from app.models import Location, Session, User
+from src.database import Base
+from src.models import Location, Session, User
 from sqlalchemy import create_engine
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import sessionmaker

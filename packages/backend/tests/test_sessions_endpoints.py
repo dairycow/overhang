@@ -1,9 +1,9 @@
 from datetime import date, timedelta
 
 import pytest
-from app.database import Base, get_db
-from app.main import app
-from app.models import Location
+from src.database import Base, get_db
+from src.main import app
+from src.models import Location
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
