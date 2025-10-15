@@ -1,7 +1,7 @@
 from datetime import date as date_type
 from datetime import datetime
 
-from better_profanity import profanity
+from better_profanity import profanity  # type: ignore[import-untyped]
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 

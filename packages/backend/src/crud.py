@@ -194,7 +194,7 @@ def get_user_distribution(
 
     sessions = query.all()
 
-    grade_counts = {}
+    grade_counts: dict[str, int] = {}
     for session in sessions:
         for grade_entry in session.grades:
             grade = grade_entry["grade"]
@@ -210,7 +210,7 @@ def get_location_stats(db: Session, location_id: int) -> dict:
     )
 
     total_climbs = 0
-    grade_distribution = {}
+    grade_distribution: dict[str, int] = {}
 
     for session in sessions:
         for grade_entry in session.grades:
@@ -246,8 +246,8 @@ def get_aggregate_stats(
     sessions = query.all()
 
     total_climbs = 0
-    grade_distribution = {}
-    location_counts = {}
+    grade_distribution: dict[str, int] = {}
+    location_counts: dict[int, dict[str, str | int]] = {}
 
     for session in sessions:
         for grade_entry in session.grades:
@@ -264,7 +264,9 @@ def get_aggregate_stats(
         loc_name = session.location.name
         if loc_id not in location_counts:
             location_counts[loc_id] = {"name": loc_name, "count": 0}
-        location_counts[loc_id]["count"] += 1
+        count_val = location_counts[loc_id]["count"]
+        if isinstance(count_val, int):
+            location_counts[loc_id]["count"] = count_val + 1
 
     return {
         "total_climbs": total_climbs,
