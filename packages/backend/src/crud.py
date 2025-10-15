@@ -108,17 +108,9 @@ def update_session(
 
     update_data = session_data.model_dump(exclude_unset=True)
 
-    # Handle grades update specifically
+    # Handle grades update specifically - model_dump already converts to dicts
     if "grades" in update_data:
-        grades_data = [
-            {
-                "grade": grade.grade,
-                "attempts": grade.attempts,
-                "completed": grade.completed,
-            }
-            for grade in update_data["grades"]
-        ]
-        session.grades = grades_data
+        session.grades = update_data["grades"]
         del update_data["grades"]
 
     # Update other fields

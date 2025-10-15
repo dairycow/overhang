@@ -104,10 +104,8 @@ def test_create_session(db_session):
     session = Session(
         user_id=user.id,
         location_id=location.id,
-        grade="V3",
         date=date.today(),
-        attempts=3,
-        completed=True,
+        grades=[{"grade": "V3", "attempts": 3, "completed": 2}],
         rating=8,
         notes="Great climb!",
     )
@@ -118,9 +116,10 @@ def test_create_session(db_session):
     assert session.id is not None
     assert session.user_id == user.id
     assert session.location_id == location.id
-    assert session.grade == "V3"
-    assert session.attempts == 3
-    assert session.completed is True
+    assert len(session.grades) == 1
+    assert session.grades[0]["grade"] == "V3"
+    assert session.grades[0]["attempts"] == 3
+    assert session.grades[0]["completed"] == 2
     assert session.rating == 8
     assert session.notes == "Great climb!"
 
@@ -141,10 +140,8 @@ def test_session_relationships(db_session):
     session = Session(
         user_id=user.id,
         location_id=location.id,
-        grade="V3",
         date=date.today(),
-        attempts=3,
-        completed=True,
+        grades=[{"grade": "V3", "attempts": 3, "completed": 2}],
     )
     db_session.add(session)
     db_session.commit()
@@ -153,4 +150,4 @@ def test_session_relationships(db_session):
     assert session.user.username == "testuser"
     assert session.location.name == "Test Gym"
     assert len(user.sessions) == 1
-    assert user.sessions[0].grade == "V3"
+    assert user.sessions[0].grades[0]["grade"] == "V3"

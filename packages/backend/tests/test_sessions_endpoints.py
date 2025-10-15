@@ -125,10 +125,8 @@ def test_get_sessions(auth_token):
         "/sessions",
         json={
             "location_id": 1,
-            "grade": "V3",
             "date": str(date.today()),
-            "attempts": 3,
-            "completed": True,
+            "grades": [{"grade": "V3", "attempts": 3, "completed": 2}],
         },
         headers={"Authorization": f"Bearer {auth_token}"},
     )
@@ -139,7 +137,7 @@ def test_get_sessions(auth_token):
     assert response.status_code == 200
     data = response.json()
     assert len(data) == 1
-    assert data[0]["grade"] == "V3"
+    assert data[0]["grades"][0]["grade"] == "V3"
 
 
 def test_get_sessions_with_filters(auth_token):
@@ -149,10 +147,8 @@ def test_get_sessions_with_filters(auth_token):
         "/sessions",
         json={
             "location_id": 1,
-            "grade": "V3",
             "date": str(yesterday),
-            "attempts": 3,
-            "completed": True,
+            "grades": [{"grade": "V3", "attempts": 3, "completed": 2}],
         },
         headers={"Authorization": f"Bearer {auth_token}"},
     )
@@ -170,10 +166,8 @@ def test_get_session_by_id(auth_token):
         "/sessions",
         json={
             "location_id": 1,
-            "grade": "V3",
             "date": str(date.today()),
-            "attempts": 3,
-            "completed": True,
+            "grades": [{"grade": "V3", "attempts": 3, "completed": 2}],
         },
         headers={"Authorization": f"Bearer {auth_token}"},
     )
@@ -198,10 +192,8 @@ def test_update_session(auth_token):
         "/sessions",
         json={
             "location_id": 1,
-            "grade": "V3",
             "date": str(date.today()),
-            "attempts": 3,
-            "completed": False,
+            "grades": [{"grade": "V3", "attempts": 3, "completed": 1}],
         },
         headers={"Authorization": f"Bearer {auth_token}"},
     )
@@ -209,12 +201,15 @@ def test_update_session(auth_token):
 
     response = client.put(
         f"/sessions/{session_id}",
-        json={"completed": True, "rating": 9},
+        json={
+            "grades": [{"grade": "V3", "attempts": 3, "completed": 2}],
+            "rating": 9,
+        },
         headers={"Authorization": f"Bearer {auth_token}"},
     )
     assert response.status_code == 200
     data = response.json()
-    assert data["completed"] is True
+    assert data["grades"][0]["completed"] == 2
     assert data["rating"] == 9
 
 
@@ -232,10 +227,8 @@ def test_delete_session(auth_token):
         "/sessions",
         json={
             "location_id": 1,
-            "grade": "V3",
             "date": str(date.today()),
-            "attempts": 3,
-            "completed": True,
+            "grades": [{"grade": "V3", "attempts": 3, "completed": 2}],
         },
         headers={"Authorization": f"Bearer {auth_token}"},
     )
