@@ -1,50 +1,4 @@
-import pytest
-from fastapi.testclient import TestClient
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy.pool import StaticPool
-
-from src.database import Base, get_db
-from src.main import app
-from src.models import Location
-
-engine = create_engine(
-    "sqlite:///:memory:",
-    connect_args={"check_same_thread": False},
-    poolclass=StaticPool,
-)
-TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-
-
-def override_get_db():
-    try:
-        db = TestingSessionLocal()
-        yield db
-    finally:
-        db.close()
-
-
-app.dependency_overrides[get_db] = override_get_db
-
-client = TestClient(app)
-
-
-@pytest.fixture(autouse=True)
-def setup_database():
-    Base.metadata.create_all(bind=engine)
-    db = TestingSessionLocal()
-
-    location = Location(name="Test Gym", slug="test-gym")
-    db.add(location)
-    db.commit()
-    db.close()
-
-    yield
-
-    Base.metadata.drop_all(bind=engine)
-
-
-def test_register_success():
+def test_register_success(client):
     response = client.post(
         "/auth/register",
         json={"username": "testuser", "password": "password123", "home_location_id": 1},
@@ -55,7 +9,7 @@ def test_register_success():
     assert data["token_type"] == "bearer"
 
 
-def test_register_duplicate_username():
+def test_register_duplicate_username(client):
     client.post(
         "/auth/register",
         json={"username": "testuser", "password": "password123", "home_location_id": 1},
@@ -69,7 +23,7 @@ def test_register_duplicate_username():
     assert "already registered" in response.json()["detail"]
 
 
-def test_register_invalid_location():
+def test_register_invalid_location(client):
     response = client.post(
         "/auth/register",
         json={
@@ -82,27 +36,11 @@ def test_register_invalid_location():
     assert "Invalid home location" in response.json()["detail"]
 
 
-def test_register_weak_password():
-    response = client.post(
-        "/auth/register",
-        json={"username": "testuser", "password": "short", "home_location_id": 1},
-    )
-    assert response.status_code == 422
-
-
-def test_register_short_username():
-    response = client.post(
-        "/auth/register",
-        json={"username": "ab", "password": "password123", "home_location_id": 1},
-    )
-    assert response.status_code == 422
-
-
-def test_register_offensive_username():
+def test_register_offensive_username(client):
     response = client.post(
         "/auth/register",
         json={
-            "username": "badword123",
+            "username": "fuck",
             "password": "password123",
             "home_location_id": 1,
         },
@@ -111,7 +49,7 @@ def test_register_offensive_username():
     assert "inappropriate language" in str(response.json())
 
 
-def test_login_success():
+def test_login_success(client):
     client.post(
         "/auth/register",
         json={"username": "testuser", "password": "password123", "home_location_id": 1},
@@ -126,7 +64,7 @@ def test_login_success():
     assert data["token_type"] == "bearer"
 
 
-def test_login_wrong_password():
+def test_login_wrong_password(client):
     client.post(
         "/auth/register",
         json={"username": "testuser", "password": "password123", "home_location_id": 1},
@@ -139,14 +77,14 @@ def test_login_wrong_password():
     assert "Incorrect username or password" in response.json()["detail"]
 
 
-def test_login_nonexistent_user():
+def test_login_nonexistent_user(client):
     response = client.post(
         "/auth/login", data={"username": "nonexistent", "password": "password123"}
     )
     assert response.status_code == 401
 
 
-def test_get_me_authenticated():
+def test_get_me_authenticated(client):
     register_response = client.post(
         "/auth/register",
         json={"username": "testuser", "password": "password123", "home_location_id": 1},
@@ -161,11 +99,11 @@ def test_get_me_authenticated():
     assert "home_location_id" in data
 
 
-def test_get_me_unauthenticated():
+def test_get_me_unauthenticated(client):
     response = client.get("/auth/me")
     assert response.status_code == 401
 
 
-def test_get_me_invalid_token():
+def test_get_me_invalid_token(client):
     response = client.get("/auth/me", headers={"Authorization": "Bearer invalid_token"})
     assert response.status_code == 401

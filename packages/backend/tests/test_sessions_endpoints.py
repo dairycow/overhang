@@ -1,53 +1,10 @@
 from datetime import date, timedelta
 
 import pytest
-from fastapi.testclient import TestClient
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy.pool import StaticPool
-
-from src.database import Base, get_db
-from src.main import app
-from src.models import Location
-
-engine = create_engine(
-    "sqlite:///:memory:",
-    connect_args={"check_same_thread": False},
-    poolclass=StaticPool,
-)
-TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-
-
-def override_get_db():
-    try:
-        db = TestingSessionLocal()
-        yield db
-    finally:
-        db.close()
-
-
-app.dependency_overrides[get_db] = override_get_db
-
-client = TestClient(app)
-
-
-@pytest.fixture(autouse=True)
-def setup_database():
-    Base.metadata.create_all(bind=engine)
-    db = TestingSessionLocal()
-
-    location = Location(name="Test Gym", slug="test-gym")
-    db.add(location)
-    db.commit()
-    db.close()
-
-    yield
-
-    Base.metadata.drop_all(bind=engine)
 
 
 @pytest.fixture
-def auth_token():
+def auth_token(client):
     response = client.post(
         "/auth/register",
         json={"username": "testuser", "password": "password123", "home_location_id": 1},
@@ -55,7 +12,7 @@ def auth_token():
     return response.json()["access_token"]
 
 
-def test_create_session_success(auth_token):
+def test_create_session_success(client, auth_token):
     response = client.post(
         "/sessions",
         json={
@@ -76,7 +33,7 @@ def test_create_session_success(auth_token):
     assert data["rating"] == 8
 
 
-def test_create_session_invalid_location(auth_token):
+def test_create_session_invalid_location(client, auth_token):
     response = client.post(
         "/sessions",
         json={
@@ -89,7 +46,7 @@ def test_create_session_invalid_location(auth_token):
     assert response.status_code == 400
 
 
-def test_create_session_unauthenticated():
+def test_create_session_unauthenticated(client):
     response = client.post(
         "/sessions",
         json={
@@ -101,7 +58,7 @@ def test_create_session_unauthenticated():
     assert response.status_code == 401
 
 
-def test_create_session_with_zero_attempts(auth_token):
+def test_create_session_with_zero_attempts(client, auth_token):
     response = client.post(
         "/sessions",
         json={
@@ -120,7 +77,7 @@ def test_create_session_with_zero_attempts(auth_token):
     assert data["grades"][0]["completed"] == 1
 
 
-def test_get_sessions(auth_token):
+def test_get_sessions(client, auth_token):
     client.post(
         "/sessions",
         json={
@@ -140,7 +97,7 @@ def test_get_sessions(auth_token):
     assert data[0]["grades"][0]["grade"] == "V3"
 
 
-def test_get_sessions_with_filters(auth_token):
+def test_get_sessions_with_filters(client, auth_token):
     yesterday = date.today() - timedelta(days=1)
 
     client.post(
@@ -161,7 +118,7 @@ def test_get_sessions_with_filters(auth_token):
     assert len(response.json()) == 1
 
 
-def test_get_session_by_id(auth_token):
+def test_get_session_by_id(client, auth_token):
     create_response = client.post(
         "/sessions",
         json={
@@ -180,14 +137,14 @@ def test_get_session_by_id(auth_token):
     assert response.json()["id"] == session_id
 
 
-def test_get_session_not_found(auth_token):
+def test_get_session_not_found(client, auth_token):
     response = client.get(
         "/sessions/999", headers={"Authorization": f"Bearer {auth_token}"}
     )
     assert response.status_code == 404
 
 
-def test_update_session(auth_token):
+def test_update_session(client, auth_token):
     create_response = client.post(
         "/sessions",
         json={
@@ -213,7 +170,7 @@ def test_update_session(auth_token):
     assert data["rating"] == 9
 
 
-def test_update_session_not_found(auth_token):
+def test_update_session_not_found(client, auth_token):
     response = client.put(
         "/sessions/999",
         json={"completed": True},
@@ -222,7 +179,7 @@ def test_update_session_not_found(auth_token):
     assert response.status_code == 404
 
 
-def test_delete_session(auth_token):
+def test_delete_session(client, auth_token):
     create_response = client.post(
         "/sessions",
         json={
@@ -245,7 +202,7 @@ def test_delete_session(auth_token):
     assert get_response.status_code == 404
 
 
-def test_delete_session_not_found(auth_token):
+def test_delete_session_not_found(client, auth_token):
     response = client.delete(
         "/sessions/999", headers={"Authorization": f"Bearer {auth_token}"}
     )

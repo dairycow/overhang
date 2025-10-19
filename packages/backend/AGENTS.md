@@ -4,7 +4,7 @@
 
 - **Install**: `uv pip install -e ".[dev]"`
 - **Run**: `uvicorn src.main:app --reload`
-- **Test**: `tox` or `pytest`
+- **Test**: `pytest`
 - **Database**: Reset with `../scripts/db-reset.sh` or seed with `tox -e seed`
 - **Code Quality**: `tox -e format`, `tox -e lint`, `tox -e type`
 

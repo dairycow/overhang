@@ -1,51 +1,8 @@
 import pytest
-from fastapi.testclient import TestClient
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy.pool import StaticPool
-
-from src.database import Base, get_db
-from src.main import app
-from src.models import Location
-
-engine = create_engine(
-    "sqlite:///:memory:",
-    connect_args={"check_same_thread": False},
-    poolclass=StaticPool,
-)
-TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-
-
-def override_get_db():
-    try:
-        db = TestingSessionLocal()
-        yield db
-    finally:
-        db.close()
-
-
-app.dependency_overrides[get_db] = override_get_db
-
-client = TestClient(app)
-
-
-@pytest.fixture(autouse=True)
-def setup_database():
-    Base.metadata.create_all(bind=engine)
-    db = TestingSessionLocal()
-
-    location = Location(name="Test Gym", slug="test-gym")
-    db.add(location)
-    db.commit()
-    db.close()
-
-    yield
-
-    Base.metadata.drop_all(bind=engine)
 
 
 @pytest.fixture
-def auth_token():
+def auth_token(client):
     response = client.post(
         "/auth/register",
         json={"username": "testuser", "password": "password123", "home_location_id": 1},
@@ -53,7 +10,7 @@ def auth_token():
     return response.json()["access_token"]
 
 
-def test_get_locations():
+def test_get_locations(client):
     response = client.get("/locations")
     assert response.status_code == 200
     data = response.json()
@@ -61,7 +18,7 @@ def test_get_locations():
     assert data[0]["name"] == "Test Gym"
 
 
-def test_get_location_by_slug():
+def test_get_location_by_slug(client):
     response = client.get("/locations/test-gym")
     assert response.status_code == 200
     data = response.json()
@@ -69,12 +26,12 @@ def test_get_location_by_slug():
     assert data["name"] == "Test Gym"
 
 
-def test_get_location_not_found():
+def test_get_location_not_found(client):
     response = client.get("/locations/nonexistent")
     assert response.status_code == 404
 
 
-def test_user_progress(auth_token):
+def test_user_progress(client, auth_token):
     from datetime import date
 
     client.post(
@@ -96,7 +53,7 @@ def test_user_progress(auth_token):
     assert data[0]["grade"] == "V3"
 
 
-def test_user_distribution(auth_token):
+def test_user_distribution(client, auth_token):
     from datetime import date
 
     client.post(
@@ -118,7 +75,7 @@ def test_user_distribution(auth_token):
     assert data["V3"] >= 1
 
 
-def test_location_stats(auth_token):
+def test_location_stats(client, auth_token):
     from datetime import date
 
     client.post(
@@ -138,7 +95,7 @@ def test_location_stats(auth_token):
     assert data["total_climbs"] >= 1
 
 
-def test_aggregate_stats(auth_token):
+def test_aggregate_stats(client, auth_token):
     from datetime import date
 
     client.post(
