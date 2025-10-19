@@ -2,6 +2,7 @@
 Seed test users into the database for development/testing.
 DO NOT run this in production!
 """
+
 import sys
 from pathlib import Path
 
@@ -58,7 +59,9 @@ def seed_test_users():
         created_users = []
         for user_data in test_users:
             # Check if user already exists
-            existing_user = db.query(User).filter(User.username == user_data["username"]).first()
+            existing_user = (
+                db.query(User).filter(User.username == user_data["username"]).first()
+            )
             if existing_user:
                 print(f"⚠️  User '{user_data['username']}' already exists. Skipping.")
                 continue
@@ -68,11 +71,15 @@ def seed_test_users():
                 db=db,
                 username=user_data["username"],
                 password=user_data["password"],
-                home_location_id=user_data["home_location_id"]
+                home_location_id=user_data["home_location_id"],
             )
             created_users.append(user)
-            location = db.query(Location).filter(Location.id == user.home_location_id).first()
-            print(f"✅ Created user: {user.username} (home: {location.name if location else 'Unknown'})")
+            location = (
+                db.query(Location).filter(Location.id == user.home_location_id).first()
+            )
+            print(
+                f"✅ Created user: {user.username} (home: {location.name if location else 'Unknown'})"
+            )
 
         if created_users:
             print(f"\n✨ Successfully created {len(created_users)} test user(s)")

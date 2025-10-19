@@ -7,6 +7,7 @@ Or: tox -e seed-test
 
 ⚠️  WARNING: This is for development/testing only! DO NOT run in production!
 """
+
 import sys
 from pathlib import Path
 

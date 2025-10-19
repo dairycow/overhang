@@ -6,6 +6,7 @@ from sqlalchemy.pool import StaticPool
 
 from src.database import Base, get_db
 from src.main import app
+
 # Import all models to ensure they're registered with Base.metadata
 from src.models import Location, User, Session  # noqa: F401
 

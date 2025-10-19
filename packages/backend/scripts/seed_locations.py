@@ -2,6 +2,7 @@
 Seed gym locations into the database.
 This should be run on initial setup and in production.
 """
+
 import sys
 from pathlib import Path
 
@@ -23,8 +24,14 @@ def seed_locations():
             locations = [
                 {"name": "Blochaus Fhyswick, Canberra", "slug": "bh-fhyswick-canberra"},
                 {"name": "Blochaus Mitchell, Canberra", "slug": "bh-mitchell-canberra"},
-                {"name": "Blochaus Port Melbourne, Melbourne", "slug": "bh-port-melbourne-melbourne"},
-                {"name": "Blochaus Marrickville, Sydney", "slug": "bh-marrickville-sydney"},
+                {
+                    "name": "Blochaus Port Melbourne, Melbourne",
+                    "slug": "bh-port-melbourne-melbourne",
+                },
+                {
+                    "name": "Blochaus Marrickville, Sydney",
+                    "slug": "bh-marrickville-sydney",
+                },
                 {"name": "Blochaus Leichhardt, Sydney", "slug": "bh-leichhardt-sydney"},
             ]
 
@@ -37,7 +44,9 @@ def seed_locations():
             for loc in locations:
                 print(f"   - {loc['name']} ({loc['slug']})")
         else:
-            print(f"ℹ️  Database already contains {existing_locations} location(s). Skipping location seed.")
+            print(
+                f"ℹ️  Database already contains {existing_locations} location(s). Skipping location seed."
+            )
 
     except Exception as e:
         db.rollback()
