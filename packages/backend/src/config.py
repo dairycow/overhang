@@ -19,13 +19,18 @@ class Settings(BaseSettings):
     allowed_origins: str = (
         "http://localhost:8000,http://127.0.0.1:8000,http://localhost:3000"
     )
+    _cached_secret_key: str | None = None
 
     def get_allowed_origins_list(self) -> list[str]:
         return [origin.strip() for origin in self.allowed_origins.split(",")]
 
     def get_secret_key(self) -> str:
+        if self._cached_secret_key:
+            return self._cached_secret_key
+
         if not self.secret_key and self.environment == "development":
-            return secrets.token_urlsafe(32)
+            self._cached_secret_key = secrets.token_urlsafe(32)
+            return self._cached_secret_key
         if not self.secret_key:
             raise ValueError("SECRET_KEY must be set in production environment")
         return self.secret_key
