@@ -1,5 +1,7 @@
 # Backend Agent Guidelines (Python/FastAPI)
 
+ALWAYS activate the .venv before running any of the following.
+
 ## Setup & Commands
 
 - **Install**: `uv pip install -e ".[dev]"`
