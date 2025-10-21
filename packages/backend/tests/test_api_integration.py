@@ -39,7 +39,7 @@ def test_user_progress(client, auth_token):
         json={
             "location_id": 1,
             "date": str(date.today()),
-            "grades": [{"grade": "V3", "attempts": 3, "completed": 2}],
+            "problems": [{"grade": "V3", "attempts": 3, "sends": 2}],
         },
         headers={"Authorization": f"Bearer {auth_token}"},
     )
@@ -61,7 +61,7 @@ def test_user_distribution(client, auth_token):
         json={
             "location_id": 1,
             "date": str(date.today()),
-            "grades": [{"grade": "V3", "attempts": 3, "completed": 2}],
+            "problems": [{"grade": "V3", "attempts": 3, "sends": 2}],
         },
         headers={"Authorization": f"Bearer {auth_token}"},
     )
@@ -83,7 +83,7 @@ def test_location_stats(client, auth_token):
         json={
             "location_id": 1,
             "date": str(date.today()),
-            "grades": [{"grade": "V3", "attempts": 3, "completed": 2}],
+            "problems": [{"grade": "V3", "attempts": 3, "sends": 2}],
         },
         headers={"Authorization": f"Bearer {auth_token}"},
     )
@@ -103,7 +103,7 @@ def test_aggregate_stats(client, auth_token):
         json={
             "location_id": 1,
             "date": str(date.today()),
-            "grades": [{"grade": "V3", "attempts": 3, "completed": 2}],
+            "problems": [{"grade": "V3", "attempts": 3, "sends": 2}],
         },
         headers={"Authorization": f"Bearer {auth_token}"},
     )
