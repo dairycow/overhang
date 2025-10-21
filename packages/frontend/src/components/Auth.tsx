@@ -1,7 +1,5 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { authService } from '../services/auth'
-import { Location } from '../types'
-import apiClient from '../services/api'
 
 interface AuthProps {
   onLogin: () => void
@@ -9,7 +7,6 @@ interface AuthProps {
 
 function Auth({ onLogin }: AuthProps) {
   const [isLogin, setIsLogin] = useState(true)
-  const [locations, setLocations] = useState<Location[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
@@ -21,23 +18,6 @@ function Auth({ onLogin }: AuthProps) {
   const [registerUsername, setRegisterUsername] = useState('')
   const [registerEmail, setRegisterEmail] = useState('')
   const [registerPassword, setRegisterPassword] = useState('')
-  const [registerLocationId, setRegisterLocationId] = useState<number>(0)
-
-  useEffect(() => {
-    fetchLocations()
-  }, [])
-
-  const fetchLocations = async () => {
-    try {
-      const response = await apiClient.get('/api/locations')
-      setLocations(response.data)
-      if (response.data.length > 0) {
-        setRegisterLocationId(response.data[0].id)
-      }
-    } catch (err) {
-      console.error('Failed to fetch locations:', err)
-    }
-  }
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -64,8 +44,7 @@ function Auth({ onLogin }: AuthProps) {
       const response = await authService.register({
         username: registerUsername,
         email: registerEmail || undefined,
-        password: registerPassword,
-        home_location_id: registerLocationId
+        password: registerPassword
       })
       authService.setAuthToken(response.access_token)
       onLogin()
@@ -172,28 +151,6 @@ function Auth({ onLogin }: AuthProps) {
               />
             </div>
 
-            {/* Home Location field (register only) */}
-            {!isLogin && (
-              <div>
-                <label htmlFor="location" className="block text-sm font-medium text-gray-700">
-                  home location
-                </label>
-                <select
-                  id="location"
-                  value={registerLocationId}
-                  onChange={(e) => setRegisterLocationId(parseInt(e.target.value))}
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-gray-500 focus:border-gray-500"
-                  required
-                >
-                  <option value={0}>select location...</option>
-                  {locations.map(location => (
-                    <option key={location.id} value={location.id}>
-                      {location.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            )}
 
             <button
               type="submit"

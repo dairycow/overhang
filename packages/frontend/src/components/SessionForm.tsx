@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { SessionCreate, GradeEntry, Location, User } from '../types'
+import { SessionCreate, ProblemCreate, Location, User } from '../types'
 import apiClient from '../services/api'
 import { authService } from '../services/auth'
 import GradePicker from './GradePicker'
@@ -16,13 +16,8 @@ function SessionForm({ onSessionCreated }: SessionFormProps) {
   const [sessionData, setSessionData] = useState<SessionCreate>({
     location_id: 0,
     date: new Date().toISOString().split('T')[0],
-    grades: [
-      { grade: 'VB', attempts: 0, completed: 0 },
-      { grade: 'V0', attempts: 0, completed: 0 },
-      { grade: 'V3', attempts: 0, completed: 0 }
-    ],
-    rating: undefined,
-    notes: ''
+    problems: [],
+    rating: undefined
   })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -84,20 +79,23 @@ function SessionForm({ onSessionCreated }: SessionFormProps) {
         return
       }
 
-      // Filter out grades with no completed sends (empty entries)
-      const filteredSessionData = {
-        ...sessionData,
-        grades: sessionData.grades.filter(grade => grade.completed > 0)
-      }
-
-      // Ensure at least one grade has completed sends
-      if (filteredSessionData.grades.length === 0) {
-        setError('Please add at least one grade with sends')
+      // Ensure at least one problem has been added
+      if (sessionData.problems.length === 0) {
+        setError('Please add at least one problem')
         setLoading(false)
         return
       }
 
-      await apiClient.post('/api/sessions', filteredSessionData)
+      await apiClient.post('/api/sessions', sessionData)
+
+      // Reset form
+      setSessionData({
+        location_id: sessionData.location_id, // Keep same location
+        date: new Date().toISOString().split('T')[0],
+        problems: [],
+        rating: undefined
+      })
+
       onSessionCreated()
     } catch (err: any) {
       const detail = err.response?.data?.detail
@@ -111,25 +109,26 @@ function SessionForm({ onSessionCreated }: SessionFormProps) {
     }
   }
 
-  const addGradeEntry = () => {
+  const addProblem = () => {
+    const defaultGrade = user?.default_grade || 'V0'
     setSessionData(prev => ({
       ...prev,
-      grades: [...prev.grades, { grade: 'V3', attempts: 0, completed: 0 }]
+      problems: [...prev.problems, { grade: defaultGrade, attempts: 1, sends: 0, notes: '' }]
     }))
   }
 
-  const removeGradeEntry = (index: number) => {
+  const removeProblem = (index: number) => {
     setSessionData(prev => ({
       ...prev,
-      grades: prev.grades.filter((_, i) => i !== index)
+      problems: prev.problems.filter((_, i) => i !== index)
     }))
   }
 
-  const updateGradeEntry = (index: number, field: keyof GradeEntry, value: string | number) => {
+  const updateProblem = (index: number, field: keyof ProblemCreate, value: string | number) => {
     setSessionData(prev => ({
       ...prev,
-      grades: prev.grades.map((grade, i) =>
-        i === index ? { ...grade, [field]: value } : grade
+      problems: prev.problems.map((problem, i) =>
+        i === index ? { ...problem, [field]: value } : problem
       )
     }))
   }
@@ -180,102 +179,98 @@ function SessionForm({ onSessionCreated }: SessionFormProps) {
           </div>
         </div>
 
-        {/* Grade Entries */}
+        {/* Problems */}
         <div>
-          <div className="mb-3">
+          <div className="mb-3 flex justify-between items-center">
             <label className="block text-sm font-medium text-gray-700">
-              grades climbed
+              problems
             </label>
+            <button
+              type="button"
+              onClick={addProblem}
+              className="px-4 py-1 bg-gray-800 text-white text-sm rounded hover:bg-gray-900 touch-manipulation"
+            >
+              + add problem
+            </button>
           </div>
 
-          <div className="space-y-2 sm:space-y-3">
-            {sessionData.grades.map((grade, index) => (
-              <div key={index} className="p-2 sm:p-3 bg-gray-50 rounded-md">
-                {/* Row 1: Grade Picker */}
-                <div className="flex justify-center mb-2 sm:mb-3">
-                  <GradePicker
-                    value={grade.grade}
-                    onChange={(newGrade) => updateGradeEntry(index, 'grade', newGrade)}
-                  />
-                </div>
+          {sessionData.problems.length === 0 ? (
+            <div className="text-center py-8 text-gray-500">
+              Click "add problem" to start logging
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {sessionData.problems.map((problem, index) => (
+                <div key={index} className="p-3 bg-gray-50 rounded-md border border-gray-200">
+                  {/* Row 1: Grade Picker */}
+                  <div className="flex justify-center mb-3">
+                    <GradePicker
+                      value={problem.grade}
+                      onChange={(newGrade) => updateProblem(index, 'grade', newGrade)}
+                    />
+                  </div>
 
-                {/* Row 2: Controls */}
-                <div className="flex items-center justify-between">
-                  <div className="flex items-end space-x-3 sm:space-x-4">
+                  {/* Row 2: Attempts and Sends */}
+                  <div className="flex items-end space-x-4 mb-3">
                     <NumberStepper
                       label="attempts"
-                      value={grade.attempts}
-                      onChange={(value) => updateGradeEntry(index, 'attempts', value)}
+                      value={problem.attempts}
+                      onChange={(value) => updateProblem(index, 'attempts', value)}
                       min={0}
                     />
                     <NumberStepper
                       label="sends"
-                      value={grade.completed}
-                      onChange={(value) => updateGradeEntry(index, 'completed', value)}
+                      value={problem.sends}
+                      onChange={(value) => updateProblem(index, 'sends', value)}
                       min={0}
                     />
                   </div>
 
-                  {sessionData.grades.length > 1 && (
+                  {/* Row 3: Notes */}
+                  <div className="mb-2">
+                    <input
+                      type="text"
+                      value={problem.notes || ''}
+                      onChange={(e) => updateProblem(index, 'notes', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-500"
+                      placeholder="notes for this problem..."
+                    />
+                  </div>
+
+                  {/* Row 4: Remove Button */}
+                  <div className="flex justify-end">
                     <button
                       type="button"
-                      onClick={() => removeGradeEntry(index)}
-                      className="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center bg-red-600 text-white rounded-full hover:bg-red-700 touch-manipulation text-lg font-bold"
-                      aria-label="Remove grade"
+                      onClick={() => removeProblem(index)}
+                      className="px-3 py-1 text-sm bg-red-600 text-white rounded hover:bg-red-700"
                     >
-                      ×
+                      remove
                     </button>
-                  )}
+                  </div>
                 </div>
-              </div>
-            ))}
-           </div>
-         </div>
-
-         {/* Add Grade Button */}
-         <div className="flex justify-center mt-4">
-           <button
-             type="button"
-             onClick={addGradeEntry}
-             className="px-6 py-2 bg-gray-800 text-white text-sm rounded hover:bg-gray-900 touch-manipulation"
-           >
-             + add grade
-           </button>
-         </div>
-
-         {/* Session Rating and Notes */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              rating (1-10)
-            </label>
-            <select
-              value={sessionData.rating || ''}
-              onChange={(e) => setSessionData(prev => ({
-                ...prev,
-                rating: e.target.value ? parseInt(e.target.value) : undefined
-              }))}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-500"
-            >
-              <option value="">optional</option>
-              {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(num => (
-                <option key={num} value={num}>{num}</option>
               ))}
-            </select>
-          </div>
+            </div>
+          )}
+        </div>
 
-          <div className="md:col-span-1">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              notes
-            </label>
-            <input
-              type="text"
-              value={sessionData.notes}
-              onChange={(e) => setSessionData(prev => ({ ...prev, notes: e.target.value }))}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-500"
-              placeholder="how was it?"
-            />
-          </div>
+        {/* Session Rating */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            session rating (1-10)
+          </label>
+          <select
+            value={sessionData.rating || ''}
+            onChange={(e) => setSessionData(prev => ({
+              ...prev,
+              rating: e.target.value ? parseInt(e.target.value) : undefined
+            }))}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-500"
+          >
+            <option value="">optional</option>
+            {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(num => (
+              <option key={num} value={num}>{num}</option>
+            ))}
+          </select>
         </div>
 
         {/* Submit Button */}

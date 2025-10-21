@@ -7,6 +7,8 @@ from .. import crud
 from ..database import get_db
 from ..dependencies import get_current_user
 from ..models import User
+from ..schemas import Problem as ProblemSchema
+from ..schemas import ProblemCreate, ProblemUpdate
 from ..schemas import Session as SessionSchema
 from ..schemas import SessionCreate, SessionUpdate
 
@@ -84,5 +86,54 @@ def delete_session(
     if not success:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Session not found"
+        )
+    return None
+
+
+# Problem endpoints
+@router.post(
+    "/{session_id}/problems",
+    response_model=ProblemSchema,
+    status_code=status.HTTP_201_CREATED,
+)
+def create_problem(
+    session_id: int,
+    problem_data: ProblemCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    problem = crud.create_problem(db, session_id, current_user.id, problem_data)
+    if not problem:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Session not found"
+        )
+    return problem
+
+
+@router.put("/problems/{problem_id}", response_model=ProblemSchema)
+def update_problem(
+    problem_id: int,
+    problem_data: ProblemUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    problem = crud.update_problem(db, problem_id, current_user.id, problem_data)
+    if not problem:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Problem not found"
+        )
+    return problem
+
+
+@router.delete("/problems/{problem_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_problem(
+    problem_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    success = crud.delete_problem(db, problem_id, current_user.id)
+    if not success:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Problem not found"
         )
     return None

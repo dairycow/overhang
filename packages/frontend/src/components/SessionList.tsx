@@ -85,7 +85,7 @@ function SessionList() {
           <div>
             <div className="font-medium text-gray-900">
               {sessions.reduce((total, session) =>
-                total + session.grades.reduce((gradeTotal, grade) => gradeTotal + grade.attempts, 0), 0
+                total + session.problems.reduce((problemTotal, problem) => problemTotal + problem.attempts, 0), 0
               )}
             </div>
             <div className="text-gray-700">total attempts</div>
@@ -93,7 +93,7 @@ function SessionList() {
           <div>
             <div className="font-medium text-gray-900">
               {sessions.reduce((total, session) =>
-                total + session.grades.reduce((gradeTotal, grade) => gradeTotal + grade.completed, 0), 0
+                total + session.problems.reduce((problemTotal, problem) => problemTotal + problem.sends, 0), 0
               )}
             </div>
             <div className="text-gray-700">routes sent</div>
@@ -144,39 +144,40 @@ function SessionList() {
             </div>
 
             <div className="mb-4">
-              <h4 className="font-medium text-gray-900 mb-2">grades climbed:</h4>
-              <div className="flex flex-wrap gap-2">
-                {session.grades.map((grade, index) => {
-                  const color = getGradeColor(grade.grade)
+              <h4 className="font-medium text-gray-900 mb-2">problems logged:</h4>
+              <div className="space-y-2">
+                {session.problems.map((problem, index) => {
+                  const color = getGradeColor(problem.grade)
                   const isWhite = color === '#F3F4F6'
                   return (
                     <div
                       key={index}
-                      className="flex items-center space-x-2 px-3 py-1 rounded-full bg-gray-100"
+                      className="flex items-start space-x-3 p-3 bg-gray-50 rounded border border-gray-200"
                     >
                       <div
-                        className={`w-4 h-4 rounded-full ${isWhite ? 'border-2 border-gray-900' : ''}`}
+                        className={`w-6 h-6 rounded-full flex-shrink-0 ${isWhite ? 'border-2 border-gray-900' : ''}`}
                         style={{ backgroundColor: color }}
-                        title={grade.grade}
+                        title={problem.grade}
                       />
-                      <span className="text-sm font-medium text-gray-800">
-                        {grade.completed}/{grade.attempts}
-                      </span>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center space-x-2 mb-1">
+                          <span className="text-sm font-semibold text-gray-900">{problem.grade}</span>
+                          <span className="text-sm text-gray-600">
+                            {problem.sends}/{problem.attempts} {problem.sends === 1 ? 'send' : 'sends'}
+                          </span>
+                        </div>
+                        {problem.notes && (
+                          <p className="text-sm text-gray-700 italic">"{problem.notes}"</p>
+                        )}
+                      </div>
                     </div>
                   )
                 })}
               </div>
             </div>
 
-            {session.notes && (
-              <div className="mb-4">
-                <h4 className="font-medium text-gray-900 mb-1">notes:</h4>
-                <p className="text-gray-700 italic">"{session.notes}"</p>
-              </div>
-            )}
-
             <div className="text-sm text-gray-500 border-t pt-3">
-              session #{session.id} • logged {formatDate(session.created_at)}
+              logged {formatDate(session.created_at)}
             </div>
           </div>
         ))}

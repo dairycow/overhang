@@ -4,7 +4,13 @@ export interface User {
   username: string
   email?: string
   home_location_id: number
+  default_grade: string
   created_at: string
+}
+
+export interface UserUpdate {
+  home_location_id?: number
+  default_grade?: string
 }
 
 // Location types
@@ -15,11 +21,29 @@ export interface Location {
   created_at: string
 }
 
-// Grade entry types
-export interface GradeEntry {
+// Problem types
+export interface Problem {
+  id: number
+  session_id: number
   grade: string
   attempts: number
-  completed: number
+  sends: number
+  notes?: string
+  created_at: string
+}
+
+export interface ProblemCreate {
+  grade: string
+  attempts: number
+  sends: number
+  notes?: string
+}
+
+export interface ProblemUpdate {
+  grade?: string
+  attempts?: number
+  sends?: number
+  notes?: string
 }
 
 // Session types
@@ -29,26 +53,22 @@ export interface Session {
   location_id: number
   location_name: string
   date: string
-  grades: GradeEntry[]
+  problems: Problem[]
   rating?: number
-  notes?: string
   created_at: string
 }
 
 export interface SessionCreate {
   location_id: number
   date: string
-  grades: GradeEntry[]
+  problems: ProblemCreate[]
   rating?: number
-  notes?: string
 }
 
 export interface SessionUpdate {
   location_id?: number
   date?: string
-  grades?: GradeEntry[]
   rating?: number
-  notes?: string
 }
 
 // Auth types
@@ -61,7 +81,7 @@ export interface RegisterCredentials {
   username: string
   email?: string
   password: string
-  home_location_id: number
+  home_location_id?: number
 }
 
 export interface AuthResponse {
