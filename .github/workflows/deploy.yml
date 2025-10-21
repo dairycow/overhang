@@ -87,10 +87,7 @@ jobs:
             echo "Pulling latest changes..."
             git pull origin main
 
-            echo "Stopping services and removing volumes..."
-            docker-compose down -v
-
-            echo "Building and starting services..."
+            echo "Building and restarting services..."
             docker-compose up -d --build
 
             echo "Waiting for services to be ready..."
