@@ -18,7 +18,9 @@ def test_create_session_success(client, auth_token):
         json={
             "location_id": 1,
             "date": str(date.today()),
-            "problems": [{"grade": "V3", "attempts": 3, "sends": 2, "notes": "Great climb!"}],
+            "problems": [
+                {"grade": "V3", "attempts": 3, "sends": 2, "notes": "Great climb!"}
+            ],
             "rating": 8,
         },
         headers={"Authorization": f"Bearer {auth_token}"},
