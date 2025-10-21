@@ -7,7 +7,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
 from src.database import Base
-from src.models import Location, Session, User
+from src.models import Location, Problem, Session, User
 
 
 @pytest.fixture(scope="function")
@@ -105,23 +105,33 @@ def test_create_session(db_session):
         user_id=user.id,
         location_id=location.id,
         date=date.today(),
-        grades=[{"grade": "V3", "attempts": 3, "completed": 2}],
         rating=8,
-        notes="Great climb!",
     )
     db_session.add(session)
+    db_session.commit()
+    db_session.refresh(session)
+
+    # Add a problem to the session
+    problem = Problem(
+        session_id=session.id,
+        grade="V3",
+        attempts=3,
+        sends=2,
+        notes="Great climb!",
+    )
+    db_session.add(problem)
     db_session.commit()
     db_session.refresh(session)
 
     assert session.id is not None
     assert session.user_id == user.id
     assert session.location_id == location.id
-    assert len(session.grades) == 1
-    assert session.grades[0]["grade"] == "V3"
-    assert session.grades[0]["attempts"] == 3
-    assert session.grades[0]["completed"] == 2
+    assert len(session.problems) == 1
+    assert session.problems[0].grade == "V3"
+    assert session.problems[0].attempts == 3
+    assert session.problems[0].sends == 2
     assert session.rating == 8
-    assert session.notes == "Great climb!"
+    assert session.problems[0].notes == "Great climb!"
 
 
 def test_session_relationships(db_session):
@@ -141,13 +151,22 @@ def test_session_relationships(db_session):
         user_id=user.id,
         location_id=location.id,
         date=date.today(),
-        grades=[{"grade": "V3", "attempts": 3, "completed": 2}],
     )
     db_session.add(session)
+    db_session.commit()
+
+    # Add a problem
+    problem = Problem(
+        session_id=session.id,
+        grade="V3",
+        attempts=3,
+        sends=2,
+    )
+    db_session.add(problem)
     db_session.commit()
     db_session.refresh(session)
 
     assert session.user.username == "testuser"
     assert session.location.name == "Test Gym"
     assert len(user.sessions) == 1
-    assert user.sessions[0].grades[0]["grade"] == "V3"
+    assert user.sessions[0].problems[0].grade == "V3"
