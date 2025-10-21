@@ -5,7 +5,13 @@ from sqlalchemy.orm import Session, joinedload
 from .auth import get_password_hash
 from .models import Location, Problem, User
 from .models import Session as SessionModel
-from .schemas import ProblemCreate, ProblemUpdate, SessionCreate, SessionUpdate, UserUpdate
+from .schemas import (
+    ProblemCreate,
+    ProblemUpdate,
+    SessionCreate,
+    SessionUpdate,
+    UserUpdate,
+)
 
 
 def create_user(
