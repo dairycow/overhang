@@ -87,14 +87,14 @@ jobs:
             echo "Pulling latest changes..."
             git pull origin main
 
-            echo "Building and restarting services..."
+            echo "Stopping services and removing volumes..."
+            docker-compose down -v
+
+            echo "Building and starting services..."
             docker-compose up -d --build
 
             echo "Waiting for services to be ready..."
-            sleep 5
-
-            echo "Running database migrations..."
-            docker-compose exec -T backend python scripts/migrate_to_problems.py --auto || echo "Migration already completed or not needed"
+            sleep 10
 
             echo "Pruning old images..."
             docker image prune -f
