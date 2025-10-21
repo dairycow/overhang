@@ -32,6 +32,7 @@ class User(Base):
     home_location_id: Mapped[int] = mapped_column(
         Integer, ForeignKey("locations.id"), nullable=False
     )
+    default_grade: Mapped[str] = mapped_column(String, nullable=False, default="V0")
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
     sessions: Mapped[list["Session"]] = relationship(
@@ -51,14 +52,31 @@ class Session(Base):
         Integer, ForeignKey("locations.id"), nullable=False, index=True
     )
     date: Mapped[date_type] = mapped_column(Date, default=date_type.today, index=True)
-    grades: Mapped[list[dict]] = mapped_column(JSON, nullable=False, default=list)
     rating: Mapped[int | None] = mapped_column(Integer, nullable=True)
-    notes: Mapped[str | None] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
     user: Mapped["User"] = relationship("User", back_populates="sessions")
     location: Mapped["Location"] = relationship("Location", back_populates="sessions")
+    problems: Mapped[list["Problem"]] = relationship(
+        "Problem", back_populates="session", cascade="all, delete-orphan"
+    )
 
     @property
     def location_name(self) -> str:
         return self.location.name
+
+
+class Problem(Base):
+    __tablename__ = "problems"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    session_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("sessions.id"), nullable=False, index=True
+    )
+    grade: Mapped[str] = mapped_column(String, nullable=False)
+    attempts: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    sends: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    notes: Mapped[str | None] = mapped_column(Text, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+    session: Mapped["Session"] = relationship("Session", back_populates="problems")

@@ -90,6 +90,12 @@ jobs:
             echo "Building and restarting services..."
             docker-compose up -d --build
 
+            echo "Waiting for services to be ready..."
+            sleep 5
+
+            echo "Running database migrations..."
+            docker-compose exec -T backend python scripts/migrate_to_problems.py --auto || echo "Migration already completed or not needed"
+
             echo "Pruning old images..."
             docker image prune -f
 

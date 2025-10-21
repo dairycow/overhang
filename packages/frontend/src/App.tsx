@@ -6,6 +6,7 @@ import SessionList from './components/SessionList'
 import Dashboard from './components/Dashboard'
 import Homepage from './components/Homepage'
 import LocationDetail from './components/LocationDetail'
+import UserSettings from './components/UserSettings'
 import { authService } from './services/auth'
 
 // Protected route wrapper
@@ -86,6 +87,16 @@ function Navigation({ isAuthenticated, onLogout }: { isAuthenticated: boolean; o
                 >
                   log session
                 </Link>
+                <Link
+                  to="/settings"
+                  className={`px-4 py-2 rounded transition ${
+                    location.pathname === '/settings'
+                      ? 'bg-gray-700'
+                      : 'bg-gray-800 hover:bg-gray-700'
+                  }`}
+                >
+                  settings
+                </Link>
               </>
             ) : null}
           </nav>
@@ -137,6 +148,17 @@ function Navigation({ isAuthenticated, onLogout }: { isAuthenticated: boolean; o
                     }`}
                   >
                     log session
+                  </Link>
+                  <Link
+                    to="/settings"
+                    onClick={handleNavigation}
+                    className={`block px-4 py-3 transition ${
+                      location.pathname === '/settings'
+                        ? 'bg-gray-700 text-white'
+                        : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+                    }`}
+                  >
+                    settings
                   </Link>
                 </div>
               ) : null}
@@ -195,6 +217,11 @@ function App() {
             <Route path="/log-session" element={
               <ProtectedRoute>
                 <SessionForm onSessionCreated={() => window.location.href = '/sessions'} />
+              </ProtectedRoute>
+            } />
+            <Route path="/settings" element={
+              <ProtectedRoute>
+                <UserSettings />
               </ProtectedRoute>
             } />
 
