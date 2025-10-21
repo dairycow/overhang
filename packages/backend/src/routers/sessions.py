@@ -8,9 +8,8 @@ from ..database import get_db
 from ..dependencies import get_current_user
 from ..models import User
 from ..schemas import Problem as ProblemSchema
-from ..schemas import ProblemCreate, ProblemUpdate
+from ..schemas import ProblemCreate, ProblemUpdate, SessionCreate, SessionUpdate
 from ..schemas import Session as SessionSchema
-from ..schemas import SessionCreate, SessionUpdate
 
 router = APIRouter()
 
